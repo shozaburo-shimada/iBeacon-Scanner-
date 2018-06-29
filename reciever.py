@@ -37,7 +37,7 @@ syainList = []
 for item in privatedb.SYAIN:
     syainList.append(Syain(item["NAME"], item["MAC"], item["SLACKID"]))
 
-TIMEOUT = 10 # sec
+TIMEOUT = 60 # sec
 dev_id = 0
 
 try:
@@ -51,6 +51,7 @@ except:
 bs.hci_le_set_scan_parameters(sock)
 bs.hci_enable_le_scan(sock)
 
+cnt = 0
 while True:
     returnedList = bs.parse_events(sock, 10)
     print "----------"
@@ -61,14 +62,16 @@ while True:
                 if item.flagRoom == 0:
                     print item.name + "-san, find!!!"
                     item.flagRoom = 1
+                    cnt += 1
+                    print "cnt: " + str(cnt)
                     #Change status
-                    postString = item.slackid
-                    postString += " entry"
-                    slack = slackweb.Slack(url=privatedb.SLACKURL)
-                    slack.notify(text=postString)
-
-                    #sheet.append([item.name, "IN", datetime.datetime.now().strftime("%H:%M:%S")])
                     sheet.write(index+1, [item.name, "IN", datetime.now(tz=JST()).strftime("%H:%M:%S")])
+
+                    #postString = item.slackid
+                    #postString += " entry"
+                    #slack = slackweb.Slack(url=privatedb.SLACKURL)
+                    #slack.notify(text=postString)
+
                 else:
                     print item.name + "-san, still in the office"
 
@@ -83,13 +86,16 @@ while True:
                 if (time.time() - item.losttime) > TIMEOUT:
                     print item.name + "-san, out of office"
                     item.flagRoom = 0
-                    #Change status
-                    postString = item.slackid
-                    postString += " exit"
-                    slack = slackweb.Slack(url=privatedb.SLACKURL)
-                    slack.notify(text=postString)
+                    cnt -= 1
+                    print "cnt: " + str(cnt)
 
-                    #sheet.append([item.name, "OUT", datetime.datetime.now().strftime("%H:%M:%S")])
+                    #Change status
                     sheet.write(index+1, [item.name, "OUT", datetime.now(tz=JST()).strftime("%H:%M:%S")])
+                    if cnt < 1:
+                        postString = item.slackid
+                        postString += ", Security"
+                        slack = slackweb.Slack(url=privatedb.SLACKURL)
+                        slack.notify(text=postString)
+
                 else:
                     print "Lost time: %d" %(time.time() - item.losttime)
