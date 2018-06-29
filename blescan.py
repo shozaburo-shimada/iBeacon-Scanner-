@@ -47,9 +47,10 @@ ADV_SCAN_RSP=0x04
 
 class BleScan():
     def __init__(self):
-        self.UUID = 0
-        self.MACADDRESS = 0
-        self.RSSI = 0
+        pass
+        #self.UUID = 0
+        #self.MACADDRESS = 0
+        #self.RSSI = 0
 
     def returnnumberpacket(self, pkt):
         myInteger = 0
@@ -127,6 +128,8 @@ class BleScan():
         done = False
         results = []
         myFullList = []
+        myParamList = []
+        cnt = 0
         for i in range(0, loop_count):
             pkt = sock.recv(255)
             ptype, event, plen = struct.unpack("BBB", pkt[:3])
@@ -147,12 +150,15 @@ class BleScan():
                     num_reports = struct.unpack("B", pkt[0])[0]
                     report_pkt_offset = 0
                     for i in range(0, num_reports):
+                        #print "i: %d" % i
+                        myParamList.append(BleParam(cnt))
+
                         if (DEBUG == True):
                             print "-------------"
                             #print "\tfullpacket: ", printpacket(pkt)
-                            print "\tUDID: ", printpacket(pkt[report_pkt_offset -22: report_pkt_offset - 6])
-                            print "\tMAJOR: ", printpacket(pkt[report_pkt_offset -6: report_pkt_offset - 4])
-                            print "\tMINOR: ", printpacket(pkt[report_pkt_offset -4: report_pkt_offset - 2])
+                            print "\tUDID: ", self.printpacket(pkt[report_pkt_offset -22: report_pkt_offset - 6])
+                            print "\tMAJOR: ", self.printpacket(pkt[report_pkt_offset -6: report_pkt_offset - 4])
+                            print "\tMINOR: ", self.printpacket(pkt[report_pkt_offset -4: report_pkt_offset - 2])
                             print "\tMAC address: ", self.packed_bdaddr_to_string(pkt[report_pkt_offset + 3:report_pkt_offset + 9])
                             # commented out - don't know what this byte is.  It's NOT TXPower
                             txpower, = struct.unpack("b", pkt[report_pkt_offset -2])
@@ -160,6 +166,11 @@ class BleScan():
 
                             rssi, = struct.unpack("b", pkt[report_pkt_offset -1])
                             print "\tRSSI:", rssi
+
+                        #Test
+                        myParamList[cnt].UUID = self.returnstringpacket(pkt[report_pkt_offset -22: report_pkt_offset - 6])
+                        myParamList[cnt].MACADDRESS = self.packed_bdaddr_to_string(pkt[report_pkt_offset + 3:report_pkt_offset + 9])
+                        myParamList[cnt].RSSI = "%i" % struct.unpack("b", pkt[report_pkt_offset -1])
 
                         # build the return string
                         Adstring = self.packed_bdaddr_to_string(pkt[report_pkt_offset + 3:report_pkt_offset + 9])
@@ -176,6 +187,17 @@ class BleScan():
 
                         #print "\tAdstring=", Adstring
                         myFullList.append(Adstring)
+                        cnt += 1
+
                     done = True
         sock.setsockopt( bluez.SOL_HCI, bluez.HCI_FILTER, old_filter )
-        return myFullList
+        #return myFullList
+
+        return myParamList
+
+class BleParam():
+        def __init__(self, num):
+            self.NUM = num
+            self.UUID = 0
+            self.MACADDRESS = 0
+            self.RSSI = 0
