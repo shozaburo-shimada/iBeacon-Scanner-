@@ -4,7 +4,9 @@ from blescan import BleScan
 import sys
 import bluetooth._bluetooth as bluez
 import time
+from datetime import datetime, timedelta, tzinfo
 import slackweb
+from gsheet import SpreadSheet
 import privatedb
 
 class Syain():
@@ -15,7 +17,21 @@ class Syain():
         self.losttime = 0
         self.flagRoom = 0
 
+class JST(tzinfo):
+    def utcoffset(self, dt):
+        return timedelta(hours=9)
+
+
+    def dst(self, dt):
+        return timedelta(0)
+
+
+    def tzname(self, dt):
+        return 'JST'
+
 bs = BleScan()
+sheet = SpreadSheet(privatedb.SHEETID)
+
 syainList = []
 
 for item in privatedb.SYAIN:
@@ -50,6 +66,9 @@ while True:
                     postString += " entry"
                     slack = slackweb.Slack(url=privatedb.SLACKURL)
                     slack.notify(text=postString)
+
+                    #sheet.append([item.name, "IN", datetime.datetime.now().strftime("%H:%M:%S")])
+                    sheet.write(index+1, [item.name, "IN", datetime.now(tz=JST()).strftime("%H:%M:%S")])
                 else:
                     print item.name + "-san, still in the office"
 
@@ -69,5 +88,8 @@ while True:
                     postString += " exit"
                     slack = slackweb.Slack(url=privatedb.SLACKURL)
                     slack.notify(text=postString)
+
+                    #sheet.append([item.name, "OUT", datetime.datetime.now().strftime("%H:%M:%S")])
+                    sheet.write(index+1, [item.name, "OUT", datetime.now(tz=JST()).strftime("%H:%M:%S")])
                 else:
                     print "Lost time: %d" %(time.time() - item.losttime)
