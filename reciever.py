@@ -54,7 +54,7 @@ bs.hci_enable_le_scan(sock)
 cnt = 0
 while True:
     returnedList = bs.parse_events(sock, 10)
-    print "----------"
+    #print "----------"
 
     for index, item in enumerate(syainList):
         for beacon in returnedList:
@@ -63,7 +63,7 @@ while True:
                     print item.name + "-san, find!!!"
                     item.flagRoom = 1
                     cnt += 1
-                    print "cnt: " + str(cnt)
+
                     #Change status
                     sheet.write(index+1, [item.name, "IN", datetime.now(tz=JST()).strftime("%H:%M:%S")])
 
@@ -87,7 +87,6 @@ while True:
                     print item.name + "-san, out of office"
                     item.flagRoom = 0
                     cnt -= 1
-                    print "cnt: " + str(cnt)
 
                     #Change status
                     sheet.write(index+1, [item.name, "OUT", datetime.now(tz=JST()).strftime("%H:%M:%S")])
