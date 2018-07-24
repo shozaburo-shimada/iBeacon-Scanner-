@@ -171,6 +171,7 @@ class BleScan():
                         myParamList[cnt].UUID = self.returnstringpacket(pkt[report_pkt_offset -22: report_pkt_offset - 6])
                         myParamList[cnt].MACADDRESS = self.packed_bdaddr_to_string(pkt[report_pkt_offset + 3:report_pkt_offset + 9])
                         myParamList[cnt].RSSI = "%i" % struct.unpack("b", pkt[report_pkt_offset -1])
+                        myParamList[cnt].TXPOWER = "%i" % struct.unpack("b", pkt[report_pkt_offset -2])
 
                         # build the return string
                         Adstring = self.packed_bdaddr_to_string(pkt[report_pkt_offset + 3:report_pkt_offset + 9])
@@ -201,3 +202,4 @@ class BleParam():
             self.UUID = 0
             self.MACADDRESS = 0
             self.RSSI = 0
+            self.TXPOWER = 0

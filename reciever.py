@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, tzinfo
 import slackweb
 from gsheet import SpreadSheet
 import privatedb
+import gc
 
 class Syain():
     def __init__(self, name, mac, slackid):
@@ -52,6 +53,8 @@ bs.hci_le_set_scan_parameters(sock)
 bs.hci_enable_le_scan(sock)
 
 cnt = 0
+returnedList = []
+
 while True:
     returnedList = bs.parse_events(sock, 10)
     #print "----------"
@@ -73,7 +76,7 @@ while True:
                     #slack.notify(text=postString)
 
                 else:
-                    print item.name + "-san, still in the office"
+                    print item.name + "-san, still in the office, TxPower: " + beacon.TXPOWER + ", RSSI: " + beacon.RSSI
 
                 item.losttime = 0
 
@@ -98,3 +101,4 @@ while True:
 
                 else:
                     print "Lost time: %d" %(time.time() - item.losttime)
+    gc.collect()
