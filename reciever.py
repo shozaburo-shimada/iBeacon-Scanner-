@@ -63,7 +63,7 @@ while True:
         for beacon in returnedList:
             if item.mac == beacon.MACADDRESS:
                 if item.flagRoom == 0:
-                    print item.name + "-san, find!!!"
+                    #print item.name + "-san, find!!!"
                     item.flagRoom = 1
                     cnt += 1
 
@@ -75,19 +75,19 @@ while True:
                     #slack = slackweb.Slack(url=privatedb.SLACKURL)
                     #slack.notify(text=postString)
 
-                else:
-                    print item.name + "-san, still in the office, TxPower: " + beacon.TXPOWER + ", RSSI: " + beacon.RSSI
+                #else:
+                    #print item.name + "-san, still in the office, TxPower: " + beacon.TXPOWER + ", RSSI: " + beacon.RSSI
 
                 item.losttime = 0
 
         if item.flagRoom == 1:
-            print item.name + "-san, beacon is not recieved!"
+            #print item.name + "-san, beacon is not recieved!"
             if item.losttime == 0:
                 #Start count Time out
                 item.losttime = time.time()
             else:
                 if (time.time() - item.losttime) > TIMEOUT:
-                    print item.name + "-san, out of office"
+                    #print item.name + "-san, out of office"
                     item.flagRoom = 0
                     cnt -= 1
 
@@ -99,6 +99,6 @@ while True:
                         slack = slackweb.Slack(url=privatedb.SLACKURL)
                         slack.notify(text=postString)
 
-                else:
-                    print "Lost time: %d" %(time.time() - item.losttime)
+                #else:
+                    #print "Lost time: %d" %(time.time() - item.losttime)
     gc.collect()
